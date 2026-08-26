@@ -1,0 +1,16 @@
+{
+  "challenge_module": "BerkovichUncu.problem",
+  "solution_module": "BerkovichUncu.solution",
+  "theorem_names": [
+    "BerkovichUncu.phi_stat",
+    "BerkovichUncu.Phi_stat",
+    "BerkovichUncu.psiInv_oddMultiplicity",
+    "BerkovichUncu.G_oddPart"
+  ],
+  "permitted_axioms": [
+    "propext",
+    "Quot.sound",
+    "Classical.choice"
+  ],
+  "enable_nanoda": false
+}
