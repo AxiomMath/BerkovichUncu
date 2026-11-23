@@ -1,7 +1,8 @@
-import Mathlib
-set_option backward.isDefEq.respectTransparency false
+module
 
-/-
+public import Mathlib
+
+/-!
 # Problem Description
 
 This file formalizes the explicit Berkovich--Uncu bijection and its statistic
@@ -48,6 +49,8 @@ the fiber equivalence `mainEquiv` together with the cardinality corollary
 Reference: `main-5.tex`, Sections 2.1--2.5, Definitions def:phi, def:Phi,
 def:psiinv, def:G, Lemmas lem:phi, lem:Phi, lem:psiinv, lem:G, Theorem thm:main.
 -/
+
+@[expose] public section
 
 namespace BerkovichUncu
 
@@ -346,7 +349,8 @@ structure BUData (n : ℕ) where
   Φ_bij : Function.Bijective
     (fun x : A1 n => (⟨mkPartition (PhiRaw x.1.parts) (Φ_pos x) (Φ_sum x), Φ_mem x⟩ : A2 n))
   ψInv_bij : Function.Bijective
-    (fun x : A2 n => (⟨mkPartition (psiInvRaw x.1.parts) (ψInv_pos x) (ψInv_sum x), ψInv_mem x⟩ : O n))
+    (fun x : A2 n =>
+      (⟨mkPartition (psiInvRaw x.1.parts) (ψInv_pos x) (ψInv_sum x), ψInv_mem x⟩ : O n))
   G_bij : Function.Bijective
     (fun x : O n => (⟨mkPartition (GRaw x.1.parts) (G_pos x) (G_sum x), G_mem x⟩ : D n))
 
@@ -550,9 +554,9 @@ theorem F_stat (x : D n) :
   obtain ⟨hΦ1, hΦ3⟩ := Phi_stat data (φ data x)
   obtain ⟨hψG1, hψG3⟩ := psiG_stat data (Φ data (φ data x))
   refine ⟨?_, ?_⟩
-  · show r1 (G data (ψInv data (Φ data (φ data x)))).1 = e1 x.1
+  · change r1 (G data (ψInv data (Φ data (φ data x)))).1 = e1 x.1
     rw [hψG1, hΦ1, hφ1]
-  · show r3 (G data (ψInv data (Φ data (φ data x)))).1 = e3 x.1
+  · change r3 (G data (ψInv data (Φ data (φ data x)))).1 = e3 x.1
     rw [hψG3, hΦ3, hφ3]
 
 /-- `DSource i j n`: the fiber `{λ ∈ D n : e1 λ = i ∧ e3 λ = j}`. -/

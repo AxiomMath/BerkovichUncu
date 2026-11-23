@@ -1,7 +1,8 @@
-import Mathlib
-set_option backward.isDefEq.respectTransparency false
+module
 
-/-
+public import Mathlib
+
+/-!
 # Problem Description
 
 This file formalizes the explicit Berkovich--Uncu bijection and its statistic
@@ -48,6 +49,8 @@ the fiber equivalence `mainEquiv` together with the cardinality corollary
 Reference: `main-5.tex`, Sections 2.1--2.5, Definitions def:phi, def:Phi,
 def:psiinv, def:G, Lemmas lem:phi, lem:Phi, lem:psiinv, lem:G, Theorem thm:main.
 -/
+
+@[expose] public section
 
 namespace BerkovichUncu
 
@@ -346,7 +349,8 @@ structure BUData (n : ℕ) where
   Φ_bij : Function.Bijective
     (fun x : A1 n => (⟨mkPartition (PhiRaw x.1.parts) (Φ_pos x) (Φ_sum x), Φ_mem x⟩ : A2 n))
   ψInv_bij : Function.Bijective
-    (fun x : A2 n => (⟨mkPartition (psiInvRaw x.1.parts) (ψInv_pos x) (ψInv_sum x), ψInv_mem x⟩ : O n))
+    (fun x : A2 n =>
+      (⟨mkPartition (psiInvRaw x.1.parts) (ψInv_pos x) (ψInv_sum x), ψInv_mem x⟩ : O n))
   G_bij : Function.Bijective
     (fun x : O n => (⟨mkPartition (GRaw x.1.parts) (G_pos x) (G_sum x), G_mem x⟩ : D n))
 
@@ -494,7 +498,7 @@ theorem phi_r_eq_countParts (s : Multiset ℕ) (hnd : s.Nodup) (d : ℕ) (hd : d
   apply Finset.card_nbij' (fun i => 2 * i + 1) (fun p => (p + 1) / 2 - 1)
   · -- MapsTo forward
     intro i hi
-    simp only [Finset.coe_filter, Finset.mem_range, Set.mem_setOf_eq] at hi ⊢
+    simp only [Finset.coe_filter, Finset.mem_range, Set.mem_ofPred_eq] at hi ⊢
     obtain ⟨hilt, hires⟩ := hi
     have hmem : (2 * (i + 1) - 1) ∈ s := phi_col_odd_mem s hnd (i + 1) d hd hires
     have h2i : 2 * (i + 1) - 1 = 2 * i + 1 := by omega
@@ -505,7 +509,7 @@ theorem phi_r_eq_countParts (s : Multiset ℕ) (hnd : s.Nodup) (d : ℕ) (hd : d
   · -- MapsTo backward
     intro p hp
     simp only [Finset.coe_filter, Finset.mem_range, Multiset.mem_toFinset,
-      Set.mem_setOf_eq] at hp ⊢
+      Set.mem_ofPred_eq] at hp ⊢
     obtain ⟨hpmem, hpodd, hpres⟩ := hp
     obtain ⟨t, rfl⟩ := hpodd
     have hle : (2 * t + 1 + 1) / 2 ≤ maxCol := by
@@ -520,12 +524,12 @@ theorem phi_r_eq_countParts (s : Multiset ℕ) (hnd : s.Nodup) (d : ℕ) (hd : d
     rw [hc2]; exact hpres
   · -- LeftInvOn
     intro i hi
-    simp only [Finset.coe_filter, Finset.mem_range, Set.mem_setOf_eq] at hi
+    simp only [Finset.coe_filter, Finset.mem_range, Set.mem_ofPred_eq] at hi
     have : (2 * i + 1 + 1) / 2 - 1 = i := by omega
     exact this
   · -- RightInvOn
     intro p hp
-    simp only [Finset.coe_filter, Multiset.mem_toFinset, Set.mem_setOf_eq] at hp
+    simp only [Finset.coe_filter, Multiset.mem_toFinset, Set.mem_ofPred_eq] at hp
     obtain ⟨hpmem, hpodd, hpres⟩ := hp
     obtain ⟨t, rfl⟩ := hpodd
     simp only
@@ -554,7 +558,7 @@ theorem zipIdx_filter_eq (P : ℕ → Prop) [DecidablePred P] (L : List ℕ)
     obtain ⟨hhead, htail⟩ := h
     have hfa : (a :: t).filter (fun q => a < q) = [] := by
       rw [List.filter_cons]
-      simp only [lt_irrefl, decide_false, Bool.false_eq_true, if_false]
+      simp only [lt_irrefl, decide_false, Bool.false_eq_true, ite_false]
       apply List.filter_eq_nil_iff.mpr
       intro b hb
       have : a > b := hhead b hb
@@ -577,7 +581,7 @@ theorem zipIdx_filter_eq (P : ℕ → Prop) [DecidablePred P] (L : List ℕ)
     · have h1 : decide (Odd (a, 0).1 ∧ P (a, 0).2) = true := by simp [hc]
       have h2 : decide (Odd a ∧ P ((a :: t).filter (fun q => a < q)).length) = true := by
         rw [hfa]; simp [hc]
-      rw [if_pos h1, if_pos h2]
+      rw [ite_eq_left h1, ite_eq_left h2]
       simp only [List.length_cons]
       rw [hmapfilter]
       have hrhs : (t.filter (fun p => Odd p ∧ P ((a :: t).filter (fun q => p < q)).length)).length
@@ -590,7 +594,7 @@ theorem zipIdx_filter_eq (P : ℕ → Prop) [DecidablePred P] (L : List ℕ)
     · have h1 : decide (Odd (a, 0).1 ∧ P (a, 0).2) = false := by simp [hc]
       have h2 : decide (Odd a ∧ P ((a :: t).filter (fun q => a < q)).length) = false := by
         rw [hfa]; simp [hc]
-      rw [if_neg (by rw [h1]; simp), if_neg (by rw [h2]; simp)]
+      rw [ite_eq_right (by rw [h1]; simp), ite_eq_right (by rw [h2]; simp)]
       rw [hmapfilter]
       have hrhs : (t.filter (fun p => Odd p ∧ P ((a :: t).filter (fun q => p < q)).length)).length
           = (t.filter (fun p => Odd p ∧ P ((t.filter (fun q => p < q)).length + 1)) ).length := by
@@ -675,7 +679,7 @@ theorem phi_stat (x : D n) :
     rw [Nat.odd_iff]; omega
   refine ⟨?_, ?_⟩
   · -- r1 (φ x) = e1 x
-    show ((phiRaw x.1.parts).filter (fun m => m % 4 = 1)).card = e1 x.1
+    change ((phiRaw x.1.parts).filter (fun m => m % 4 = 1)).card = e1 x.1
     rw [← Multiset.countP_eq_card_filter, phi_r_eq_countParts x.1.parts hnd 1 (by norm_num)]
     unfold e1 sortedParts
     rw [he1]
@@ -685,7 +689,7 @@ theorem phi_stat (x : D n) :
     by_cases hpo : Odd p
     · simp only [hpo, true_and, hres1 p hp hpo]
     · simp [hpo]
-  · show ((phiRaw x.1.parts).filter (fun m => m % 4 = 3)).card = e3 x.1
+  · change ((phiRaw x.1.parts).filter (fun m => m % 4 = 3)).card = e3 x.1
     rw [← Multiset.countP_eq_card_filter, phi_r_eq_countParts x.1.parts hnd 3 (by norm_num)]
     unfold e3 sortedParts
     rw [he3]
@@ -762,7 +766,7 @@ theorem Nd_eraseIdx (d : ℕ) (l : List ℕ) (j : ℕ) (v : ℕ)
   unfold Nd
   rw [List.countP_cons]
   have hnc : ¬ (v % 4 = d) := not_res_of_dvd4 hv hd
-  simp only [hnc, decide_false, Bool.false_eq_true, if_false]
+  simp only [hnc, decide_false, Bool.false_eq_true, ite_false]
   omega
 
 /-- `preExtract` preserves `Nd` for `d ∈ {1,3}`. -/
@@ -856,7 +860,7 @@ theorem Nd_iterExtractStep (d : ℕ) (hd : d = 1 ∨ d = 3) (l : List ℕ)
   unfold Nd
   rw [List.countP_cons]
   have hnc : ¬ (v % 4 = d) := not_res_of_dvd4 hdvd hd
-  simp only [hnc, decide_false, Bool.false_eq_true, if_false]
+  simp only [hnc, decide_false, Bool.false_eq_true, ite_false]
   omega
 
 /-- `sortDesc` produces a weakly decreasing list. -/
@@ -1028,7 +1032,7 @@ theorem psiInv_oddMultiplicity (x : A2 n) (m : ℕ) (hm : Odd m) :
       by_cases hpo : p % 2 = 1
       · -- p odd summand {p}
         have hp2m : ¬ (2 * m = p) := by intro h; omega
-        simp only [hpo, if_true, Multiset.count_singleton, hp2m, if_false,
+        simp only [hpo, ite_true, Multiset.count_singleton, hp2m, ite_false,
           Nat.mul_zero, Nat.add_zero]
       · -- p even summand {p/2, p/2}
         have hpe : p % 2 = 0 := by omega
@@ -1039,14 +1043,14 @@ theorem psiInv_oddMultiplicity (x : A2 n) (m : ℕ) (hm : Odd m) :
           simp only [Multiset.insert_eq_cons, Multiset.count_cons,
             Multiset.count_singleton]
           by_cases hd : m = p / 2 <;> simp [hd]
-        simp only [hpo, if_false, hcnt]
-        rw [if_neg hpm]
+        simp only [hpo, ite_false, hcnt]
+        rw [ite_eq_right hpm]
         simp only [Nat.zero_add]
         by_cases hd : m = p / 2
         · have hp2m : (2 * m = p) := by omega
-          rw [if_pos hd, if_pos hp2m]
+          rw [ite_eq_left hd, ite_eq_left hp2m]
         · have hp2m : ¬ (2 * m = p) := by intro h; apply hd; omega
-          rw [if_neg hd, if_neg hp2m]
+          rw [ite_eq_right hd, ite_eq_right hp2m]
     rw [hmap, Multiset.sum_map_add, hind m]
     congr 1
     have hmul : (s.map (fun p => 2 * (if (2 * m) = p then (1:ℕ) else 0))).sum
@@ -1228,9 +1232,9 @@ theorem F_stat (x : D n) :
   obtain ⟨hΦ1, hΦ3⟩ := Phi_stat data (φ data x)
   obtain ⟨hψG1, hψG3⟩ := psiG_stat data (Φ data (φ data x))
   refine ⟨?_, ?_⟩
-  · show r1 (G data (ψInv data (Φ data (φ data x)))).1 = e1 x.1
+  · change r1 (G data (ψInv data (Φ data (φ data x)))).1 = e1 x.1
     rw [hψG1, hΦ1, hφ1]
-  · show r3 (G data (ψInv data (Φ data (φ data x)))).1 = e3 x.1
+  · change r3 (G data (ψInv data (Φ data (φ data x)))).1 = e3 x.1
     rw [hψG3, hΦ3, hφ3]
 
 /-- `DSource i j n`: the fiber `{λ ∈ D n : e1 λ = i ∧ e3 λ = j}`. -/
